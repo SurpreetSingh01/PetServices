@@ -1,0 +1,14 @@
+﻿@model PetServices.Models.Services
+
+<h1>Service Details</h1>
+
+<div>
+    <h3>@Model.ServiceName</h3>
+    <p><strong>Description:</strong> @Model.Description</p>
+    <p><strong>Price:</strong> @Model.Price</p>
+    <p><strong>Duration:</strong> @Model.DurationInMinutes minutes</p>
+</div>
+
+<p>
+    <a href="@Url.Action("Index", "Services")" class="btn btn-secondary">Back to List</a>
+</p>
