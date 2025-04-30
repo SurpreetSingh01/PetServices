@@ -9,18 +9,18 @@ using PetServices.Data;
 
 #nullable disable
 
-namespace PetServices.Data.Migrations
+namespace PetServices.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250430045011_UpdatePricePrecision")]
-    partial class UpdatePricePrecision
+    [Migration("20250430100626_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -252,7 +252,7 @@ namespace PetServices.Data.Migrations
                     b.ToTable("CartItems");
                 });
 
-            modelBuilder.Entity("PetServices.Models.Services", b =>
+            modelBuilder.Entity("PetServices.Models.Service", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -267,6 +267,10 @@ namespace PetServices.Data.Migrations
 
                     b.Property<int>("DurationInMinutes")
                         .HasColumnType("int");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
@@ -334,7 +338,7 @@ namespace PetServices.Data.Migrations
 
             modelBuilder.Entity("PetServices.Models.CartItem", b =>
                 {
-                    b.HasOne("PetServices.Models.Services", "Service")
+                    b.HasOne("PetServices.Models.Service", "Service")
                         .WithMany()
                         .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.Cascade)

@@ -12,6 +12,11 @@ namespace PetServices.Controllers
             _emailService = emailService;
         }
 
+        public IActionResult Index()
+        {
+            return View(); // This tells ASP.NET to render Views/Home/Index.cshtml
+        }
+
         public async Task<IActionResult> SendOrderConfirmationEmail(string userEmail)
         {
             string subject = "Order Confirmation";
