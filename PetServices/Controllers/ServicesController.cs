@@ -14,6 +14,7 @@ namespace PetServices.Controllers
         {
             _context = context;
         }
+
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
@@ -22,7 +23,7 @@ namespace PetServices.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create(Services service)
+        public async Task<IActionResult> Create(Service service)
         {
             if (ModelState.IsValid)
             {
@@ -43,7 +44,7 @@ namespace PetServices.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, Services service)
+        public async Task<IActionResult> Edit(int id, Service service)
         {
             if (id != service.Id) return NotFound();
 

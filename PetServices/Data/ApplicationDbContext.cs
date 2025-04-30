@@ -11,7 +11,7 @@ namespace PetServices.Data
         {
         }
 
-        public DbSet<PetServices.Models.Services> Services { get; set; }
+        public DbSet<PetServices.Models.Service> Services { get; set; }
  
 
 public DbSet<PetServices.Models.CartItem> CartItems { get; set; }

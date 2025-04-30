@@ -11,7 +11,7 @@ namespace PetServices.Models
         public int ServiceId { get; set; }
 
         [ForeignKey("ServiceId")]
-        public Services Service { get; set; }
+        public Service Service { get; set; }
 
         public string UserId { get; set; }
 
