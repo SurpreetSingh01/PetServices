@@ -6,23 +6,32 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace PetServices.Controllers
 {
-    public class ServicesController : Controller
+    public class ServiceController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public ServicesController(ApplicationDbContext context)
+        public ServiceController(ApplicationDbContext context)
         {
             _context = context;
         }
 
+        // Publicly viewable list
+        public async Task<IActionResult> Index()
+        {
+            var services = await _context.Services.ToListAsync();
+            return View(services);
+        }
+
+        // Only Admin can add services
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Service service)
         {
             if (ModelState.IsValid)
@@ -31,6 +40,13 @@ namespace PetServices.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            // Debugging: Output model state errors to console/log
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                Console.WriteLine(error.ErrorMessage);
+            }
+
             return View(service);
         }
 
@@ -44,6 +60,7 @@ namespace PetServices.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Service service)
         {
             if (id != service.Id) return NotFound();

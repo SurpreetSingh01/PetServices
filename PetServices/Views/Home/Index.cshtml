@@ -1,8 +1,14 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Welcome to PetServices";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container text-center mt-5">
+    <h1 class="display-4">Welcome to PetServices</h1>
+    <p class="lead">We care for your pets. Book grooming, walking, training, and more!</p>
+
+    <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" width="150" alt="Pet Icon" class="my-4" />
+
+    <a class="btn btn-primary btn-lg" asp-controller="Service" asp-action="Index">
+        View Available Services
+    </a>
 </div>

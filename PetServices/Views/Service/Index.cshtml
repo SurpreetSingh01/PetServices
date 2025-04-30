@@ -1,0 +1,44 @@
+﻿@model IEnumerable<PetServices.Models.Service>
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@{
+    var isAdmin = User.IsInRole("Admin");
+}
+
+@if (SignInManager.IsSignedIn(User) && isAdmin)
+{
+    <p>
+        <a href="@Url.Action("Create", "Service")" class="btn btn-primary">Create New Service</a>
+    </p>
+}
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Service Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Duration</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var service in Model)
+        {
+            <tr>
+                <td>@service.ServiceName</td>
+                <td>@service.Description</td>
+                <td>@service.Price</td>
+                <td>@service.DurationInMinutes</td>
+                <td>
+                    <a href="@Url.Action("Details", "Service", new { id = service.Id })" class="btn btn-info">Details</a>
+                    <a href="@Url.Action("Edit", "Service", new { id = service.Id })" class="btn btn-warning">Edit</a>
+                    <a href="@Url.Action("Delete", "Service", new { id = service.Id })" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
