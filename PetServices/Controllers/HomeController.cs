@@ -1,32 +1,25 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using PetServices.Models;
+using PetServices.Services;
 
 namespace PetServices.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly EmailService _emailService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(EmailService emailService)
         {
-            _logger = logger;
+            _emailService = emailService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> SendOrderConfirmationEmail(string userEmail)
         {
+            string subject = "Order Confirmation";
+            string body = "Thank you for your order! Your order has been confirmed.";
+
+            await _emailService.SendEmailAsync(userEmail, subject, body);
+
             return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

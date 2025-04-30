@@ -1,0 +1,30 @@
+﻿@model IEnumerable<PetServices.Models.CartItem>
+
+<h2>Your Cart</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Service Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Service.ServiceName</td>
+                <td>@item.Service.Price</td>
+                <td>@item.Quantity</td>
+                <td>@(item.Service.Price * item.Quantity)</td>
+                <td>
+                    <a href="@Url.Action("RemoveFromCart", "Cart", new { id = item.Id })">Remove</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("Checkout", "Cart")">Proceed to Checkout</a>

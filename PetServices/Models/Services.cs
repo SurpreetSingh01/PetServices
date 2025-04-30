@@ -27,5 +27,6 @@ namespace PetServices.Models
         [Required]
         [Display(Name = "Duration (Minutes)")]
         public int DurationInMinutes { get; set; }
+        public string ImageUrl { get; set; }
     }
 }
