@@ -1,11 +1,40 @@
-﻿<h2>Checkout</h2>
-<form method="post">
+﻿@model IEnumerable<PetServices.Models.CartItem>
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<h2>Checkout</h2>
+
+<form asp-action="Checkout" method="post">
     <div>
-        <label>Payment Method:</label>
-        <select name="paymentMethod">
+        <label for="paymentMethod">Choose a Payment Method:</label>
+        <select id="paymentMethod" name="paymentMethod" required>
             <option value="COD">Cash on Delivery</option>
             <option value="CreditCard">Credit/Debit Card</option>
         </select>
     </div>
-    <button type="submit">Complete Order</button>
+
+    <div id="creditCardDetails" style="display:none;">
+        <label for="cardNumber">Card Number:</label>
+        <input type="text" id="cardNumber" name="cardNumber" placeholder="XXXX-XXXX-XXXX-XXXX" />
+
+        <label for="expiryDate">Expiry Date:</label>
+        <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" />
+
+        <label for="cvv">CVV:</label>
+        <input type="text" id="cvv" name="cvv" placeholder="CVV" />
+    </div>
+
+    <button type="submit">Submit</button>
 </form>
+
+@section Scripts {
+    <script>
+        const paymentMethod = document.getElementById("paymentMethod");
+        const creditCardDetails = document.getElementById("creditCardDetails");
+
+        paymentMethod.addEventListener("change", function () {
+            creditCardDetails.style.display = paymentMethod.value === "CreditCard" ? "block" : "none";
+        });
+    </script>
+}

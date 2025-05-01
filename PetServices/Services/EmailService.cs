@@ -1,31 +1,41 @@
-﻿using SendGrid;
-using SendGrid.Helpers.Mail;
-using Microsoft.Extensions.Configuration;
+﻿using System.Net;
+using System.Net.Mail;
 using System.Threading.Tasks;
 
 namespace PetServices.Services
 {
     public class EmailService
     {
-        private readonly string _apiKey;
+        private readonly string _smtpServer = "smtp.gmail.com"; // Change to your SMTP server
+        private readonly int _smtpPort = 587; // Use 465 for SSL or 587 for TLS
+        private readonly string _smtpUsername = "your-email@gmail.com"; // Your email
+        private readonly string _smtpPassword = "your-email-password"; // Your email password or app-specific password
 
-        public EmailService(IConfiguration configuration)
+        public async Task SendEmailAsync(string email, string subject, string message)
         {
-            _apiKey = configuration["SendGrid:ApiKey"]; // Get the API key from configuration
-        }
-
-        public async Task SendEmailAsync(string toEmail, string subject, string body)
-        {
-            var client = new SendGridClient(_apiKey);
-            var from = new EmailAddress("no-reply@petservices.com", "Pet Services");
-            var to = new EmailAddress(toEmail);
-            var msg = MailHelper.CreateSingleEmail(from, to, subject, body, body);
-
-            var response = await client.SendEmailAsync(msg);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            var mailMessage = new MailMessage
             {
-                // Handle failure
-                throw new Exception($"Failed to send email. Status code: {response.StatusCode}");
+                From = new MailAddress(_smtpUsername),
+                Subject = subject,
+                Body = message,
+                IsBodyHtml = false
+            };
+            mailMessage.To.Add(email);
+
+            var smtpClient = new SmtpClient(_smtpServer)
+            {
+                Port = _smtpPort,
+                Credentials = new NetworkCredential(_smtpUsername, _smtpPassword),
+                EnableSsl = true // Ensure SSL is enabled for a secure connection
+            };
+
+            try
+            {
+                await smtpClient.SendMailAsync(mailMessage);
+            }
+            catch (SmtpException ex)
+            {
+                throw new Exception($"Email failed to send. Error: {ex.Message}");
             }
         }
     }

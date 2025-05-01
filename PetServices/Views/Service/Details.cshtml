@@ -2,13 +2,13 @@
 
 <h1>Service Details</h1>
 
-<div>
-    <h3>@Model.ServiceName</h3>
-    <p><strong>Description:</strong> @Model.Description</p>
-    <p><strong>Price:</strong> @Model.Price</p>
-    <p><strong>Duration:</strong> @Model.DurationInMinutes minutes</p>
+<div class="card" style="width: 25rem;">
+    <img src="@Model.ImageUrl" class="card-img-top" alt="Service Image" />
+    <div class="card-body">
+        <h5 class="card-title">@Model.ServiceName</h5>
+        <p class="card-text">@Model.Description</p>
+        <p class="card-text"><strong>Price:</strong> $@Model.Price</p>
+        <p class="card-text"><strong>Duration:</strong> @Model.DurationInMinutes minutes</p>
+        <a href="@Url.Action("Index", "Service")" class="btn btn-secondary">Back to List</a>
+    </div>
 </div>
-
-<p>
-    <a href="@Url.Action("Index", "Services")" class="btn btn-secondary">Back to List</a>
-</p>

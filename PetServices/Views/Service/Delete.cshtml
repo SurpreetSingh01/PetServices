@@ -2,11 +2,15 @@
 
 <h1>Delete Service</h1>
 
-<div>
-    <h3>Are you sure you want to delete the service <strong>@Model.ServiceName</strong>?</h3>
-    <form asp-action="Delete" method="post">
-        <input type="hidden" name="Id" value="@Model.Id" />
-        <button type="submit" class="btn btn-danger">Delete</button>
-        <a href="@Url.Action("Index", "Services")" class="btn btn-secondary">Cancel</a>
-    </form>
+<div class="card" style="width: 25rem;">
+    <img src="@Model.ImageUrl" class="card-img-top" alt="Service Image" />
+    <div class="card-body">
+        <h5 class="card-title">@Model.ServiceName</h5>
+        <p class="card-text">@Model.Description</p>
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">Confirm Delete</button>
+            <a href="@Url.Action("Index", "Service")" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
 </div>

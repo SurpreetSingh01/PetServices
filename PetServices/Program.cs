@@ -12,16 +12,14 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add Identity services
+// Add Identity services with Roles
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddRoles<IdentityRole>() // If you’re using roles like Admin
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// Add Email service using SendGrid
-builder.Services.AddSingleton<EmailService>();  // Register EmailService for dependency injection
-
-// Add other services as needed, for example, Cart and Order services, etc.
-// builder.Services.AddScoped<CartService>();
+// Register custom services
+builder.Services.AddTransient<EmailService>();
+builder.Services.AddScoped<CartService>();
 
 var app = builder.Build();
 
@@ -34,6 +32,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -42,11 +41,14 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-app.MapRazorPages(); // Needed for Identity
+app.MapRazorPages();
+
+// ?? Seed Admin
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    await DataSeeder.SeedAdminAsync(services);
+    var configuration = services.GetRequiredService<IConfiguration>();
+    await DataSeeder.SeedAdminAsync(services, configuration);
 }
 
 app.Run();

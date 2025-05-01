@@ -1,12 +1,22 @@
 ﻿@model IEnumerable<PetServices.Models.CartItem>
 
-<h2>Your Cart</h2>
-<table>
+@{
+    ViewData["Title"] = "Your Cart";
+    decimal grandTotal = 0;
+}
+<form asp-controller="Cart" asp-action="Index" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+
+<h1>Your Cart</h1>
+
+<table class="table" id="cartTable">
     <thead>
         <tr>
-            <th>Service Name</th>
-            <th>Price</th>
+            <th>Service</th>
             <th>Quantity</th>
+            <th>Price</th>
             <th>Total</th>
             <th>Actions</th>
         </tr>
@@ -14,17 +24,76 @@
     <tbody>
         @foreach (var item in Model)
         {
+            var itemTotal = item.Quantity * item.Service.Price;
+            grandTotal += itemTotal;
             <tr>
                 <td>@item.Service.ServiceName</td>
-                <td>@item.Service.Price</td>
-                <td>@item.Quantity</td>
-                <td>@(item.Service.Price * item.Quantity)</td>
                 <td>
-                    <a href="@Url.Action("RemoveFromCart", "Cart", new { id = item.Id })">Remove</a>
+                    <input type="number"
+                           class="form-control w-auto quantity-input"
+                           data-id="@item.Id"
+                           data-price="@item.Service.Price"
+                           value="@item.Quantity"
+                           min="1" />
+                </td>
+                <td>@item.Service.Price.ToString("C")</td>
+                <td class="item-total" id="total-@item.Id">@itemTotal.ToString("C")</td>
+                <td>
+                    <a href="@Url.Action("RemoveFromCart", new { id = item.Id })" class="btn btn-danger btn-sm">Remove</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
 
-<a href="@Url.Action("Checkout", "Cart")">Proceed to Checkout</a>
+<div class="text-end">
+    <h4>Grand Total: <span id="grandTotal">@grandTotal.ToString("C")</span></h4>
+    <a href="@Url.Action("Checkout")" class="btn btn-success">Proceed to Checkout</a>
+</div>
+
+@section Scripts {
+    <script>
+        function recalculateTotals() {
+            let grandTotal = 0;
+
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                const quantity = parseInt(input.value);
+                const price = parseFloat(input.dataset.price);
+                const itemId = input.dataset.id;
+                const total = quantity * price;
+
+                document.getElementById("total-" + itemId).innerText = total.toLocaleString('en-NZ', {
+                    style: 'currency',
+                    currency: 'NZD'
+                });
+
+                grandTotal += total;
+            });
+
+            document.getElementById("grandTotal").innerText = grandTotal.toLocaleString('en-NZ', {
+                style: 'currency',
+                currency: 'NZD'
+            });
+        }
+
+        document.querySelectorAll(".quantity-input").forEach(input => {
+            input.addEventListener("change", async (e) => {
+                const id = e.target.dataset.id;
+                const quantity = parseInt(e.target.value);
+
+                // Update server
+                await fetch('/Cart/UpdateQuantity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    },
+                    body: JSON.stringify({ id: id, quantity: quantity })
+                });
+
+                // Update totals
+                recalculateTotals();
+            });
+        });
+    </script>
+}

@@ -4,41 +4,58 @@
 @inject UserManager<IdentityUser> UserManager
 
 @{
+    ViewData["Title"] = "Services";
     var isAdmin = User.IsInRole("Admin");
 }
 
+<h1 class="text-center mb-4">Our Pet Services</h1>
+
 @if (SignInManager.IsSignedIn(User) && isAdmin)
 {
-    <p>
-        <a href="@Url.Action("Create", "Service")" class="btn btn-primary">Create New Service</a>
-    </p>
+    <div class="text-end mb-3">
+        <a href="@Url.Action("Create", "Service")" class="btn btn-success">Create New Service</a>
+    </div>
 }
 
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    @foreach (var service in Model)
+    {
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                @if (!string.IsNullOrEmpty(service.ImageUrl))
+                {
+                    <img src="@service.ImageUrl" class="card-img-top" alt="@service.ServiceName"
+                         style="width: 100%; height: 200px; object-fit: cover; border-bottom: 1px solid #ddd;" />
+                }
+                else
+                {
+                    <img src="https://via.placeholder.com/300x200?text=No+Image" class="card-img-top"
+                         alt="No Image" style="width: 100%; height: 200px; object-fit: cover;" />
+                }
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Service Name</th>
-            <th>Description</th>
-            <th>Price</th>
-            <th>Duration</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var service in Model)
-        {
-            <tr>
-                <td>@service.ServiceName</td>
-                <td>@service.Description</td>
-                <td>@service.Price</td>
-                <td>@service.DurationInMinutes</td>
-                <td>
-                    <a href="@Url.Action("Details", "Service", new { id = service.Id })" class="btn btn-info">Details</a>
-                    <a href="@Url.Action("Edit", "Service", new { id = service.Id })" class="btn btn-warning">Edit</a>
-                    <a href="@Url.Action("Delete", "Service", new { id = service.Id })" class="btn btn-danger">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                <div class="card-body">
+                    <h5 class="card-title">@service.ServiceName</h5>
+                    <p class="card-text">@service.Description</p>
+                    <p class="card-text"><strong>Price:</strong> $@service.Price</p>
+                    <p class="card-text"><strong>Duration:</strong> @service.DurationInMinutes mins</p>
+                </div>
+                <div class="card-footer bg-white">
+                    @if (SignInManager.IsSignedIn(User) && isAdmin)
+                    {
+                        <a href="@Url.Action("Edit", "Service", new { id = service.Id })" class="btn btn-warning btn-sm me-1">Edit</a>
+                        <a href="@Url.Action("Delete", "Service", new { id = service.Id })" class="btn btn-danger btn-sm me-1">Delete</a>
+                        <a href="@Url.Action("Details", "Service", new { id = service.Id })" class="btn btn-info btn-sm">Details</a>
+                    }
+                    else if (SignInManager.IsSignedIn(User))
+                    {
+                        <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline">
+                            <input type="hidden" name="serviceId" value="@service.Id" />
+                            <input type="hidden" name="quantity" value="1" />
+                            <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
