@@ -2,6 +2,18 @@
 @using PetServices.Models
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
+@inject PetServices.Data.ApplicationDbContext _context
+
+@{
+    var userId = User.Identity?.Name;
+    int cartCount = 0;
+    if (!string.IsNullOrEmpty(userId))
+    {
+        cartCount = _context.CartItems
+            .Where(c => c.UserId == userId)
+            .Sum(c => c.Quantity);
+    }
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,6 +23,7 @@
     <title>@ViewData["Title"] - PetServices</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -33,6 +46,17 @@
                     <ul class="navbar-nav ms-auto">
                         @if (SignInManager.IsSignedIn(User))
                         {
+                            <li class="nav-item">
+                                <a class="nav-link position-relative" asp-controller="Cart" asp-action="Index">
+                                    <i class="bi bi-cart3"></i> Cart
+                                    @if (cartCount > 0)
+                                    {
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            @cartCount
+                                        </span>
+                                    }
+                                </a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index">Hello @User.Identity.Name</a>
                             </li>

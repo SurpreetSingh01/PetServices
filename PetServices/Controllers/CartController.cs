@@ -1,27 +1,29 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using PetServices.Data;
 using PetServices.Models;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using PetServices.Services; // Make sure you add this to use EmailService
+using PetServices.Services;
+using Stripe.Checkout;
+using Stripe;
 
 namespace PetServices.Controllers
 {
-    [Authorize] // Ensure only logged-in users can access the cart
+    [Authorize]
     public class CartController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly EmailService _emailService;
+        private readonly IConfiguration _configuration;
 
-        // Inject EmailService
-        public CartController(ApplicationDbContext context, EmailService emailService)
+        public CartController(ApplicationDbContext context, EmailService emailService, IConfiguration configuration)
         {
             _context = context;
             _emailService = emailService;
+            _configuration = configuration;
         }
 
+        // View cart
         public async Task<IActionResult> Index()
         {
             var userId = User.Identity.Name;
@@ -33,14 +35,13 @@ namespace PetServices.Controllers
             return View(cartItems);
         }
 
+        // Add service to cart
+        [HttpPost]
         public async Task<IActionResult> AddToCart(int serviceId, int quantity = 1)
         {
             var userId = User.Identity.Name;
-            var service = await _context.Services.FindAsync(serviceId);
-            if (service == null)
-            {
-                return NotFound();
-            }
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToPage("/Account/Login", new { area = "Identity" });
 
             var cartItem = await _context.CartItems
                 .FirstOrDefaultAsync(c => c.ServiceId == serviceId && c.UserId == userId);
@@ -51,6 +52,9 @@ namespace PetServices.Controllers
             }
             else
             {
+                var service = await _context.Services.FindAsync(serviceId);
+                if (service == null) return NotFound();
+
                 cartItem = new CartItem
                 {
                     ServiceId = serviceId,
@@ -61,9 +65,10 @@ namespace PetServices.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Service"); // return to services page
         }
 
+        // Remove item from cart
         public async Task<IActionResult> RemoveFromCart(int id)
         {
             var userId = User.Identity.Name;
@@ -76,11 +81,19 @@ namespace PetServices.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Checkout()
+        // GET: Checkout page
+        public async Task<IActionResult> Checkout()
         {
-            return View(); // Display checkout form (payment method selection, etc.)
+            var userId = User.Identity.Name;
+            var cartItems = await _context.CartItems
+                .Include(c => c.Service)
+                .Where(c => c.UserId == userId)
+                .ToListAsync();
+
+            return View(cartItems);
         }
 
+        // POST: Checkout processing
         [HttpPost]
         public async Task<IActionResult> Checkout(string paymentMethod)
         {
@@ -90,25 +103,71 @@ namespace PetServices.Controllers
                 .Where(c => c.UserId == userId)
                 .ToListAsync();
 
-            // Handle the order logic here (save to Order table, process payment, etc.)
-            // TODO: Add order saving logic
+            if (!cartItems.Any())
+                return RedirectToAction(nameof(Index));
 
-            // Send email confirmation to the user
-            var userEmail = User.Identity.Name; // Assuming the user email is their username (could be different)
-            var subject = "Order Confirmation";
-            var message = "Thank you for your order. Your order details are as follows:\n";
+            if (paymentMethod == "Stripe")
+            {
+                var domain = $"{Request.Scheme}://{Request.Host}/";
+                var options = new SessionCreateOptions
+                {
+                    SuccessUrl = domain + "Cart/Confirmation",
+                    CancelUrl = domain + "Cart/Index",
+                    LineItems = new List<SessionLineItemOptions>(),
+                    Mode = "payment",
+                };
+
+                foreach (var item in cartItems)
+                {
+                    options.LineItems.Add(new SessionLineItemOptions
+                    {
+                        PriceData = new SessionLineItemPriceDataOptions
+                        {
+                            UnitAmount = (long)(item.Service.Price * 100), // price in cents
+                            Currency = "nzd",
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = item.Service.ServiceName
+                            }
+                        },
+                        Quantity = item.Quantity
+                    });
+                }
+
+                var service = new SessionService();
+                var session = service.Create(options);
+
+                Response.Headers.Add("Location", session.Url);
+                return new StatusCodeResult(303); // Redirect to Stripe
+            }
+
+            // 🔁 Cash on Delivery
+            var userEmail = userId;
+            var subject = "Order Confirmation - PetServices";
+            var message = "Thank you for your order! Here’s what you’ve ordered:\n\n";
+
             foreach (var item in cartItems)
             {
-                message += $"{item.Service.ServiceName} - Quantity: {item.Quantity}\n";
+                message += $"- {item.Service.ServiceName} (x{item.Quantity})\n";
             }
+
+            message += "\nWe’ll contact you soon to confirm your booking.";
+
             await _emailService.SendEmailAsync(userEmail, subject, message);
 
-            // Clear the cart after checkout
             _context.CartItems.RemoveRange(cartItems);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Confirmation)); // Redirect to order confirmation page
+            return RedirectToAction(nameof(Confirmation));
         }
+
+        // Order success page
+        public IActionResult Confirmation()
+        {
+            return View();
+        }
+
+        // Update cart item quantity via AJAX
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateQuantity([FromBody] CartItem updatedItem)
@@ -117,19 +176,12 @@ namespace PetServices.Controllers
             var cartItem = await _context.CartItems.FindAsync(updatedItem.Id);
 
             if (cartItem == null || cartItem.UserId != userId)
-            {
                 return NotFound();
-            }
 
             cartItem.Quantity = updatedItem.Quantity;
             await _context.SaveChangesAsync();
 
             return Ok();
-        }
-
-        public IActionResult Confirmation()
-        {
-            return View(); // Display confirmation message (could be an order number, etc.)
         }
     }
 }

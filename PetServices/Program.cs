@@ -2,11 +2,17 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PetServices.Data;
 using PetServices.Services;
+using Stripe;
+
 
 var builder = WebApplication.CreateBuilder(args);
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddTransient<EmailService>();
+
 
 // Add DbContext with connection string
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

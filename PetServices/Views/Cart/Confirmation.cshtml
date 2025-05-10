@@ -2,5 +2,24 @@
     ViewData["Title"] = "Order Confirmation";
 }
 
-<h2>Order Confirmation</h2>
-<p>Your order has been successfully placed! A confirmation email has been sent to you.</p>
+<div class="container text-center mt-5">
+    <div class="card shadow-sm border-0 p-4">
+        <div class="card-body">
+            <div class="mb-4">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+            </div>
+            <h2 class="mb-3 text-success">Thank You!</h2>
+            <p class="lead">🎉 Your order has been successfully placed.</p>
+            <p>A confirmation email has been sent to your registered email address.</p>
+
+            <div class="mt-4">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-house-door-fill"></i> Back to Home
+                </a>
+                <a asp-controller="Service" asp-action="Index" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Browse More Services
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

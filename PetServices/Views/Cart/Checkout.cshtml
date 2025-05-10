@@ -1,40 +1,67 @@
 ﻿@model IEnumerable<PetServices.Models.CartItem>
+
 @{
     ViewData["Title"] = "Checkout";
+    decimal grandTotal = Model.Sum(x => x.Service.Price * x.Quantity);
 }
 
-<h2>Checkout</h2>
+<div class="container mt-5">
+    <h2 class="text-center mb-4">🧾 Checkout</h2>
 
-<form asp-action="Checkout" method="post">
-    <div>
-        <label for="paymentMethod">Choose a Payment Method:</label>
-        <select id="paymentMethod" name="paymentMethod" required>
-            <option value="COD">Cash on Delivery</option>
-            <option value="CreditCard">Credit/Debit Card</option>
-        </select>
+    <div class="card p-4 shadow-sm">
+        <form asp-action="Checkout" method="post" id="checkoutForm">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label for="paymentMethod" class="form-label">Select Payment Method:</label>
+                <select id="paymentMethod" name="paymentMethod" class="form-select" required>
+                    <option value="COD">Cash on Delivery</option>
+                    <option value="Stripe">Credit/Debit Card (Stripe)</option>
+                </select>
+            </div>
+
+            <div id="creditCardNotice" class="alert alert-warning d-none">
+                You’ll be redirected to Stripe’s secure checkout page.
+            </div>
+
+            <div class="mt-4">
+                <h5 class="fw-bold">Order Summary</h5>
+                <ul class="list-group mb-3">
+                    @foreach (var item in Model)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>@item.Service.ServiceName</strong><br />
+                                <small>@item.Quantity × @item.Service.Price.ToString("C")</small>
+                            </div>
+                            <span>@(item.Quantity * item.Service.Price).ToString("C")</span>
+                        </li>
+                    }
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Total:</strong>
+                        <strong>@grandTotal.ToString("C")</strong>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-success btn-lg">Place Order</button>
+            </div>
+        </form>
     </div>
-
-    <div id="creditCardDetails" style="display:none;">
-        <label for="cardNumber">Card Number:</label>
-        <input type="text" id="cardNumber" name="cardNumber" placeholder="XXXX-XXXX-XXXX-XXXX" />
-
-        <label for="expiryDate">Expiry Date:</label>
-        <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" />
-
-        <label for="cvv">CVV:</label>
-        <input type="text" id="cvv" name="cvv" placeholder="CVV" />
-    </div>
-
-    <button type="submit">Submit</button>
-</form>
+</div>
 
 @section Scripts {
     <script>
         const paymentMethod = document.getElementById("paymentMethod");
-        const creditCardDetails = document.getElementById("creditCardDetails");
+        const creditCardNotice = document.getElementById("creditCardNotice");
 
         paymentMethod.addEventListener("change", function () {
-            creditCardDetails.style.display = paymentMethod.value === "CreditCard" ? "block" : "none";
+            if (paymentMethod.value === "Stripe") {
+                creditCardNotice.classList.remove("d-none");
+            } else {
+                creditCardNotice.classList.add("d-none");
+            }
         });
     </script>
 }

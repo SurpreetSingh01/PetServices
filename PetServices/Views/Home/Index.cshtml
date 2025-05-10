@@ -3,12 +3,39 @@
 }
 
 <div class="container text-center mt-5">
-    <h1 class="display-4">Welcome to PetServices</h1>
-    <p class="lead">We care for your pets. Book grooming, walking, training, and more!</p>
+    <h1 class="display-4 font-weight-bold text-primary">Welcome to PetServices</h1>
+    <p class="lead text-muted">We care for your pets. Book grooming, walking, training, and more with ease!</p>
 
     <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" width="150" alt="Pet Icon" class="my-4" />
 
-    <a class="btn btn-primary btn-lg" asp-controller="Service" asp-action="Index">
-        View Available Services
-    </a>
+    <div class="mt-4">
+        <a class="btn btn-primary btn-lg shadow-lg" asp-controller="Service" asp-action="Index">
+            View Available Services
+        </a>
+    </div>
+
+    <div class="mt-5">
+        <h4 class="font-weight-bold">Why Choose Us?</h4>
+        <p class="text-muted">We offer professional, reliable, and affordable services for your furry friends.</p>
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <div class="card shadow-sm p-3 mb-5 bg-white rounded">
+                    <h5 class="card-title">Experienced Professionals</h5>
+                    <p class="card-text">Our team is made up of pet lovers and experts in the field.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm p-3 mb-5 bg-white rounded">
+                    <h5 class="card-title">Affordable Prices</h5>
+                    <p class="card-text">We believe in providing top-notch services at competitive prices.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm p-3 mb-5 bg-white rounded">
+                    <h5 class="card-title">100% Pet Satisfaction</h5>
+                    <p class="card-text">Your pet's happiness is our top priority!</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
