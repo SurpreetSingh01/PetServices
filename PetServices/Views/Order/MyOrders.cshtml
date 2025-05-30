@@ -1,0 +1,63 @@
+﻿@model IEnumerable<PetServices.Models.Order>
+
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center"><i class="bi bi-receipt-cutoff"></i> My Order History</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            You haven’t placed any orders yet.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Total ($)</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th>Services</th>
+                        <th>Invoice</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td class="text-center">@order.OrderId</td>
+                            <td class="text-center">@order.OrderDate.ToString("dd MMM yyyy")</td>
+                            <td class="text-center">@order.TotalAmount.ToString("C")</td>
+                            <td class="text-center">@order.PaymentMethod</td>
+                            <td class="text-center">
+                                <span class="badge @(order.PaymentStatus == "Paid" ? "bg-success" : "bg-warning text-dark")">
+                                    @order.PaymentStatus
+                                </span>
+                            </td>
+                            <td>
+                                <ul class="mb-0 ps-3">
+                                    @foreach (var item in order.OrderItems ?? new List<PetServices.Models.OrderItem>())
+                                    {
+                                        <li><strong>@item.Service?.ServiceName</strong> (x@item.Quantity)</li>
+                                    }
+                                </ul>
+                            </td>
+                            <td class="text-center">
+                                <a class="btn btn-sm btn-outline-primary" asp-controller="Order" asp-action="Invoice" asp-route-id="@order.OrderId">
+                                    📄 Download Invoice
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

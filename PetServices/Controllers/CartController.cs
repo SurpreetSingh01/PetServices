@@ -65,7 +65,7 @@ namespace PetServices.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index", "Service"); // return to services page
+            return RedirectToAction("Index", "Service");
         }
 
         // Remove item from cart
@@ -95,6 +95,7 @@ namespace PetServices.Controllers
 
         // POST: Checkout processing
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Checkout(string paymentMethod)
         {
             var userId = User.Identity.Name;
@@ -106,12 +107,40 @@ namespace PetServices.Controllers
             if (!cartItems.Any())
                 return RedirectToAction(nameof(Index));
 
+            // Calculate total amount
+            decimal total = cartItems.Sum(item => item.Service.Price * item.Quantity);
+
+            // Create order
+            var order = new Order
+            {
+                UserId = userId,
+                OrderDate = DateTime.Now,
+                TotalAmount = total,
+                PaymentMethod = paymentMethod,
+                PaymentStatus = paymentMethod == "COD" ? "Pending" : "Processing",
+                OrderItems = new List<OrderItem>()
+            };
+
+            foreach (var item in cartItems)
+            {
+                order.OrderItems.Add(new OrderItem
+                {
+                    ServiceId = item.ServiceId,
+                    Quantity = item.Quantity,
+                    UnitPrice = item.Service.Price
+                });
+            }
+
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+
+            // Stripe Payment Flow
             if (paymentMethod == "Stripe")
             {
                 var domain = $"{Request.Scheme}://{Request.Host}/";
                 var options = new SessionCreateOptions
                 {
-                    SuccessUrl = domain + "Cart/Confirmation",
+                    SuccessUrl = domain + $"Cart/PaymentSuccess?orderId={order.OrderId}",
                     CancelUrl = domain + "Cart/Index",
                     LineItems = new List<SessionLineItemOptions>(),
                     Mode = "payment",
@@ -123,7 +152,7 @@ namespace PetServices.Controllers
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            UnitAmount = (long)(item.Service.Price * 100), // price in cents
+                            UnitAmount = (long)(item.Service.Price * 100), // cents
                             Currency = "nzd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
@@ -138,36 +167,52 @@ namespace PetServices.Controllers
                 var session = service.Create(options);
 
                 Response.Headers.Add("Location", session.Url);
-                return new StatusCodeResult(303); // Redirect to Stripe
+                return new StatusCodeResult(303); // Stripe redirect
             }
 
-            // 🔁 Cash on Delivery
-            var userEmail = userId;
+            // Cash on Delivery flow
             var subject = "Order Confirmation - PetServices";
-            var message = "Thank you for your order! Here’s what you’ve ordered:\n\n";
-
+            var message = "Thank you for your order!\n\n";
             foreach (var item in cartItems)
             {
                 message += $"- {item.Service.ServiceName} (x{item.Quantity})\n";
             }
-
             message += "\nWe’ll contact you soon to confirm your booking.";
 
-            await _emailService.SendEmailAsync(userEmail, subject, message);
+            await _emailService.SendEmailAsync(userId, subject, message);
 
             _context.CartItems.RemoveRange(cartItems);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Confirmation));
+            return RedirectToAction(nameof(Confirmation), new { orderId = order.OrderId });
         }
 
-        // Order success page
-        public IActionResult Confirmation()
+        // Stripe: mark order as paid
+        public async Task<IActionResult> PaymentSuccess(int orderId)
         {
-            return View();
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order != null)
+            {
+                order.PaymentStatus = "Paid";
+
+                var cartItems = await _context.CartItems
+                    .Where(c => c.UserId == User.Identity.Name)
+                    .ToListAsync();
+
+                _context.CartItems.RemoveRange(cartItems);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Confirmation), new { orderId });
         }
 
-        // Update cart item quantity via AJAX
+        // Confirmation page
+        public IActionResult Confirmation(int orderId)
+        {
+            return View(orderId);
+        }
+
+        // AJAX: update cart quantity
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateQuantity([FromBody] CartItem updatedItem)

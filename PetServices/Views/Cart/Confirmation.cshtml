@@ -1,4 +1,5 @@
-﻿@{
+﻿@model int
+@{
     ViewData["Title"] = "Order Confirmation";
 }
 
@@ -10,6 +11,7 @@
             </div>
             <h2 class="mb-3 text-success">Thank You!</h2>
             <p class="lead">🎉 Your order has been successfully placed.</p>
+            <p>Your <strong>Order ID</strong> is: <span class="fw-bold">@Model</span></p>
             <p>A confirmation email has been sent to your registered email address.</p>
 
             <div class="mt-4">

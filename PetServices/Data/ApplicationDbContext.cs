@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using PetServices.Models;
 
 namespace PetServices.Data
 {
@@ -11,9 +12,9 @@ namespace PetServices.Data
         {
         }
 
-        public DbSet<PetServices.Models.Service> Services { get; set; }
- 
-
-public DbSet<PetServices.Models.CartItem> CartItems { get; set; }
+        public DbSet<Service> Services { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
     }
 }

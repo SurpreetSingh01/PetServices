@@ -1,0 +1,45 @@
+﻿@model IEnumerable<PetServices.Models.Order>
+
+@{
+    ViewData["Title"] = "All Orders";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">📦 All Orders</h2>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Order ID</th>
+                <th>User</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Payment</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.OrderId</td>
+                    <td>@order.UserId</td>
+                    <td>@order.OrderDate.ToShortDateString()</td>
+                    <td>$@order.TotalAmount</td>
+                    <td>@order.PaymentMethod</td>
+                    <td>
+                        <span class="badge @(order.PaymentStatus == "Paid" ? "bg-success" : "bg-warning")">
+                            @order.PaymentStatus
+                        </span>
+                    </td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-info" asp-action="Details" asp-route-id="@order.OrderId">
+                            <i class="bi bi-eye-fill"></i> View
+                        </a>
+                    </td>
+                </tr>
+
+            }
+        </tbody>
+    </table>
+</div>

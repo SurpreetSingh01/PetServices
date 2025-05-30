@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PetServices.Data;
 using PetServices.Services;
+using Rotativa.AspNetCore;
 using Stripe;
 
 
@@ -56,5 +57,5 @@ using (var scope = app.Services.CreateScope())
     var configuration = services.GetRequiredService<IConfiguration>();
     await DataSeeder.SeedAdminAsync(services, configuration);
 }
-
+app.UseRotativa("/Rotativa"); 
 app.Run();
