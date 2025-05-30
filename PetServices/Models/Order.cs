@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace PetServices.Models
 {
@@ -9,7 +7,11 @@ namespace PetServices.Models
         [Key]
         public int OrderId { get; set; }
 
+        [Required]
         public string UserId { get; set; }
+
+        [Required]
+        public string UserEmail { get; set; }  // ✅ Add this property
 
         [Required]
         public DateTime OrderDate { get; set; }
@@ -18,9 +20,9 @@ namespace PetServices.Models
         public decimal TotalAmount { get; set; }
 
         [Required]
-        public string PaymentStatus { get; set; }  // e.g., "Pending", "Paid"
+        public string PaymentStatus { get; set; }
 
-        public string PaymentMethod { get; set; }  // e.g., "COD", "Stripe"
+        public string PaymentMethod { get; set; }
 
         public virtual List<OrderItem> OrderItems { get; set; }
     }

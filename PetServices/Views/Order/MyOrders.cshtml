@@ -50,9 +50,11 @@
                                 </ul>
                             </td>
                             <td class="text-center">
-                                <a class="btn btn-sm btn-outline-primary" asp-controller="Order" asp-action="Invoice" asp-route-id="@order.OrderId">
-                                    📄 Download Invoice
+                                <a asp-action="DownloadInvoice" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-file-earmark-pdf"></i> PDF
                                 </a>
+
+
                             </td>
                         </tr>
                     }

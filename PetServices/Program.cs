@@ -5,32 +5,28 @@ using PetServices.Services;
 using Rotativa.AspNetCore;
 using Stripe;
 
-
 var builder = WebApplication.CreateBuilder(args);
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
-
-// Add services to the container.
+// Add services to the container
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<EmailService>();
 
-
-// Add DbContext with connection string
+// Add DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add Identity services with Roles
+// Add Identity
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// Register custom services
-builder.Services.AddTransient<EmailService>();
+// Custom services
 builder.Services.AddScoped<CartService>();
 
 var app = builder.Build();
 
-// Configure middleware
+// Middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -44,18 +40,21 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Default route
+// Routes
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
-// ?? Seed Admin
+// ? Rotativa setup for generating PDFs
+RotativaConfiguration.Setup(app.Environment.WebRootPath, "Rotativa");
+
+// ? Seed admin
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var configuration = services.GetRequiredService<IConfiguration>();
     await DataSeeder.SeedAdminAsync(services, configuration);
 }
-app.UseRotativa("/Rotativa"); 
+
 app.Run();

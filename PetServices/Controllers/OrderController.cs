@@ -2,9 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PetServices.Data;
-using Rotativa.AspNetCore;
 using PetServices.Models;
-using System.Security.Claims;
+using SelectPdf;
 
 namespace PetServices.Controllers
 {
@@ -18,20 +17,20 @@ namespace PetServices.Controllers
             _context = context;
         }
 
-        // ✅ Admin only
+        // ✅ ADMIN: View All Orders
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Service)
+                    .ThenInclude(oi => oi.Service)
+                .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
 
             return View(orders);
         }
 
-        // ✅ USER: My Order History
-        [Authorize] // <- Must allow signed-in users
+        // ✅ USER: View My Orders
         public async Task<IActionResult> MyOrders()
         {
             var userId = User.Identity?.Name;
@@ -47,7 +46,8 @@ namespace PetServices.Controllers
 
             return View(userOrders);
         }
-        [Authorize]
+
+        // ✅ USER: View Invoice HTML (Razor view)
         public async Task<IActionResult> Invoice(int id)
         {
             var order = await _context.Orders
@@ -55,13 +55,39 @@ namespace PetServices.Controllers
                 .ThenInclude(oi => oi.Service)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
 
-            if (order == null || (User.IsInRole("User") && order.UserEmail != User.Identity.Name))
+            if (order == null)
                 return NotFound();
 
-            return new ViewAsPdf("Invoice", order)
-            {
-                FileName = $"Invoice_{id}.pdf"
-            };
+            var userId = User.Identity?.Name;
+            if (User.IsInRole("User") && order.UserId != userId)
+                return Forbid();
+
+            return View(order); // Views/Order/Invoice.cshtml
+        }
+
+        // ✅ USER: Download PDF Invoice
+        public async Task<IActionResult> DownloadInvoice(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Service)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
+            if (order == null)
+                return NotFound();
+
+            var userId = User.Identity?.Name;
+            if (User.IsInRole("User") && order.UserId != userId)
+                return Forbid();
+
+            var url = Url.Action("Invoice", "Order", new { id = id }, Request.Scheme);
+            HtmlToPdf converter = new HtmlToPdf();
+            PdfDocument doc = converter.ConvertUrl(url);
+
+            byte[] pdf = doc.Save();
+            doc.Close();
+
+            return File(pdf, "application/pdf", $"Invoice_{id}.pdf");
         }
     }
 }
