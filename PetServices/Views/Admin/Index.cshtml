@@ -7,50 +7,52 @@
 <div class="container mt-4">
     <h2 class="text-center mb-4">📊 Admin Dashboard</h2>
 
-    <!-- Summary Cards -->
+    <!-- Top Summary Cards -->
     <div class="row text-center mb-4">
         <div class="col-md-3">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h6>Total Orders</h6>
-                    <h4>@Model.TotalOrders</h4>
+                    <h5>Total Orders</h5>
+                    <h3>@Model.TotalOrders</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h6>Total Sales</h6>
-                    <h4>@Model.TotalSales.ToString("C")</h4>
+                    <h5>Total Sales</h5>
+                    <h3>@Model.TotalSales.ToString("C")</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h6>Total Users</h6>
-                    <h4>@Model.TotalUsers</h4>
+                    <h5>Total Users</h5>
+                    <h3>@Model.TotalUsers</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h6>Completed Orders</h6>
-                    <h4>@(Model.OrdersByStatus.ContainsKey("Completed") ? Model.OrdersByStatus["Completed"] : 0)</h4>
+                    <h5>Completed Orders</h5>
+                    <h3>@Model.OrdersByStatus.ContainsKey("Completed") ? @Model.OrdersByStatus["Completed"] : 0</h3>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Filters -->
-    <form method="get" class="row g-3 mb-3">
+    <!-- Filters & Sorting -->
+    <form method="get" class="row g-3 mb-4">
         <div class="col-md-4">
             <select name="statusFilter" class="form-select" onchange="this.form.submit()">
                 <option value="">All Statuses</option>
                 @foreach (var status in new[] { "Pending", "Paid", "Completed", "Cancelled" })
                 {
-                    <option value="@status" selected="@(Context.Request.Query["statusFilter"] == status)">@status</option>
+                    <option value="@status" selected="@(Context.Request.Query["statusFilter"] == status)">
+                        @status
+                    </option>
                 }
             </select>
         </div>
@@ -117,7 +119,7 @@
         </tbody>
     </table>
 
-    <!-- Orders by Status Summary -->
+    <!-- Orders by Status Breakdown -->
     <div class="row mt-4">
         <div class="col-md-12">
             <h5>📑 Orders by Status</h5>

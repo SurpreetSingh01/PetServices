@@ -1,72 +1,105 @@
 ﻿@model PetServices.Models.Order
 @{
-    Layout = null; // No layout for clean PDF
+    Layout = "~/Views/Shared/_PdfLayout.cshtml";
+    ViewData["Title"] = "Invoice";
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Invoice</title>
-    <style>
-        body {
-            font-family: Arial;
-            font-size: 14px;
-        }
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        color: #333;
+    }
 
-        h1 {
-            color: #0d6efd;
-        }
+    .header {
+        text-align: center;
+        border-bottom: 2px solid #ccc;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
+    h2 {
+        text-align: center;
+        color: #0d6efd;
+        margin-bottom: 30px;
+    }
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
 
-        th {
-            background-color: #f8f9fa;
-        }
-    </style>
-</head>
-<body>
-    <h1>PetServices Invoice</h1>
+    table, th, td {
+        border: 1px solid #ccc;
+    }
+
+    th {
+        background-color: #f5f5f5;
+        padding: 8px;
+        text-align: left;
+    }
+
+    td {
+        padding: 8px;
+    }
+
+    .summary {
+        margin-top: 20px;
+        text-align: right;
+        font-size: 16px;
+    }
+
+    .footer {
+        margin-top: 40px;
+        text-align: center;
+        font-style: italic;
+        color: #888;
+    }
+</style>
+
+<div class="header">
+    <h3>🐾 PetServices</h3>
+    <p>Owned by Surpreet Singh &amp; Diljot Singh</p>
+    <p>Email: support@petservices.com | Phone: +64 123 456 789</p>
+</div>
+
+<h2>🧾 Invoice</h2>
+
+<div>
     <p><strong>Order ID:</strong> @Model.OrderId</p>
     <p><strong>Date:</strong> @Model.OrderDate.ToString("dd MMM yyyy")</p>
-    <p><strong>Payment:</strong> @Model.PaymentMethod - @Model.PaymentStatus</p>
+    <p><strong>Payment Method:</strong> @Model.PaymentMethod</p>
+    <p><strong>Status:</strong> @Model.PaymentStatus</p>
+</div>
 
-    <table>
-        <thead>
+<h4>Services</h4>
+<table>
+    <thead>
+        <tr>
+            <th>Service</th>
+            <th style="text-align:center;">Quantity</th>
+            <th style="text-align:right;">Unit Price</th>
+            <th style="text-align:right;">Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderItems)
+        {
             <tr>
-                <th>Service</th>
-                <th>Qty</th>
-                <th>Unit Price</th>
-                <th>Total</th>
+                <td>@item.Service?.ServiceName</td>
+                <td style="text-align:center;">@item.Quantity</td>
+                <td style="text-align:right;">@item.UnitPrice.ToString("C")</td>
+                <td style="text-align:right;">@((item.Quantity * item.UnitPrice).ToString("C"))</td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.OrderItems)
-            {
-                <tr>
-                    <td>@item.Service?.ServiceName</td>
-                    <td>@item.Quantity</td>
-                    <td>@item.UnitPrice.ToString("C")</td>
-                    <td>@(item.Quantity * item.UnitPrice).ToString("C")</td>
-                </tr>
-            }
-            <tr>
-                <td colspan="3" style="text-align: right;"><strong>Total:</strong></td>
-                <td><strong>@Model.TotalAmount.ToString("C")</strong></td>
-            </tr>
-        </tbody>
-    </table>
+        }
+    </tbody>
+</table>
 
-    <p style="margin-top: 40px;">Thank you for choosing PetServices! 🐾</p>
-</body>
-</html>
+<div class="summary">
+    <strong>Grand Total:</strong> @Model.TotalAmount.ToString("C")
+</div>
+
+<div class="footer">
+    Thank you for choosing PetServices! We appreciate your trust. 🐶🐱
+</div>

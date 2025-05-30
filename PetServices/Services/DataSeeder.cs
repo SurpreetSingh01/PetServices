@@ -1,10 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
+using PetServices.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
-namespace PetServices.Data // Or PetServices.Services if that's where it is
+namespace PetServices.Data
 {
     public static class DataSeeder
     {
@@ -43,6 +47,27 @@ namespace PetServices.Data // Or PetServices.Services if that's where it is
                         Console.WriteLine($"Error creating admin user: {error.Description}");
                     }
                 }
+            }
+        }
+
+        public static async Task SeedServicesAsync(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            if (!await context.Services.AnyAsync())
+            {
+                var services = new List<Service>
+                {
+                    new Service { ServiceName = "Dog Walking", Description = "Daily walk for your dog", Price = 25, DurationInMinutes = 30, ImageUrl = "/images/services/dog-walking.jpg" },
+                    new Service { ServiceName = "Pet Sitting", Description = "In-home pet sitting service", Price = 50, DurationInMinutes = 120, ImageUrl = "/images/services/pet-sitting.jpg" },
+                    new Service { ServiceName = "Vet Visit", Description = "Vet appointment transport", Price = 40, DurationInMinutes = 60, ImageUrl = "/images/services/vet.jpg" },
+                    new Service { ServiceName = "Grooming", Description = "Basic grooming for your pet", Price = 45, DurationInMinutes = 90, ImageUrl = "/images/services/grooming.jpg" },
+                    new Service { ServiceName = "Pet Training", Description = "Behavioral pet training session", Price = 60, DurationInMinutes = 60, ImageUrl = "/images/services/training.jpg" }
+                };
+
+                context.Services.AddRange(services);
+                await context.SaveChangesAsync();
             }
         }
     }

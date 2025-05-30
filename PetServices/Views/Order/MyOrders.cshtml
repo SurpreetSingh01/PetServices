@@ -45,7 +45,7 @@
                                 <ul class="mb-0 ps-3">
                                     @foreach (var item in order.OrderItems ?? new List<PetServices.Models.OrderItem>())
                                     {
-                                        <li><strong>@item.Service?.ServiceName</strong> (x@item.Quantity)</li>
+                                        <li><strong>@($"{item.Service?.ServiceName} (x{item.Quantity})")</strong></li>
                                     }
                                 </ul>
                             </td>

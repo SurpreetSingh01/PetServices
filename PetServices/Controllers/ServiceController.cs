@@ -1,28 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PetServices.Data;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PetServices.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
+using PetServices.Repositories;
 
 namespace PetServices.Controllers
 {
     public class ServiceController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IServiceRepository _serviceRepo;
 
-        public ServiceController(ApplicationDbContext context)
+        public ServiceController(IServiceRepository serviceRepo)
         {
-            _context = context;
+            _serviceRepo = serviceRepo;
         }
 
-        // Publicly viewable list
         public async Task<IActionResult> Index()
         {
-            var services = await _context.Services.ToListAsync();
+            var services = await _serviceRepo.GetAllAsync();
             return View(services);
         }
 
-        // Only Admin can add services
         [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
@@ -36,15 +33,8 @@ namespace PetServices.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Services.Add(service);
-                await _context.SaveChangesAsync();
+                await _serviceRepo.AddAsync(service);
                 return RedirectToAction(nameof(Index));
-            }
-
-            // Debugging: Output model state errors to console/log
-            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-            {
-                Console.WriteLine(error.ErrorMessage);
             }
 
             return View(service);
@@ -53,7 +43,7 @@ namespace PetServices.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
-            var service = await _context.Services.FindAsync(id);
+            var service = await _serviceRepo.GetByIdAsync(id);
             if (service == null) return NotFound();
             return View(service);
         }
@@ -67,8 +57,7 @@ namespace PetServices.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Update(service);
-                await _context.SaveChangesAsync();
+                await _serviceRepo.UpdateAsync(service);
                 return RedirectToAction(nameof(Index));
             }
             return View(service);
@@ -77,11 +66,7 @@ namespace PetServices.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            var service = await _context.Services.FindAsync(id);
-            if (service == null) return NotFound();
-
-            _context.Services.Remove(service);
-            await _context.SaveChangesAsync();
+            await _serviceRepo.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
     }
