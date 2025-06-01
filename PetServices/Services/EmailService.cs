@@ -27,7 +27,7 @@ namespace PetServices.Services
                 From = new MailAddress(smtpUsername),
                 Subject = subject,
                 Body = message,
-                IsBodyHtml = false
+                IsBodyHtml = true // ✅ Enable HTML rendering
             };
             mailMessage.To.Add(email);
 

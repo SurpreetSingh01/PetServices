@@ -3,25 +3,80 @@
     ViewData["Title"] = "Order Confirmation";
 }
 
-<div class="container text-center mt-5">
-    <div class="card shadow-sm border-0 p-4">
-        <div class="card-body">
-            <div class="mb-4">
-                <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
-            </div>
-            <h2 class="mb-3 text-success">Thank You!</h2>
-            <p class="lead">🎉 Your order has been successfully placed.</p>
-            <p>Your <strong>Order ID</strong> is: <span class="fw-bold">@Model</span></p>
-            <p>A confirmation email has been sent to your registered email address.</p>
+<style>
+    body {
+        background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    }
 
-            <div class="mt-4">
-                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary me-2">
-                    <i class="bi bi-house-door-fill"></i> Back to Home
-                </a>
-                <a asp-controller="Service" asp-action="Index" class="btn btn-primary">
-                    <i class="bi bi-search"></i> Browse More Services
-                </a>
-            </div>
+    .confirmation-card {
+        animation: fadeIn 1s ease-in-out;
+        border-radius: 20px;
+        background: #ffffff;
+    }
+
+    .confirmation-icon {
+        font-size: 5rem;
+        color: #28a745;
+        animation: bounce 1s infinite alternate;
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    @@keyframes bounce {
+        from
+
+    {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.1);
+    }
+
+    }
+
+    .confirmation-btns .btn {
+        border-radius: 30px;
+        padding: 10px 25px;
+        font-weight: 500;
+        transition: 0.3s ease;
+    }
+
+        .confirmation-btns .btn:hover {
+            transform: scale(1.05);
+        }
+</style>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card confirmation-card shadow p-5 text-center">
+        <div class="mb-4">
+            <i class="bi bi-check-circle-fill confirmation-icon"></i>
+        </div>
+        <h2 class="mb-3 text-success fw-bold">Thank You!</h2>
+        <p class="lead">🎉 Your order has been successfully placed.</p>
+        <p class="fs-5">Your <strong>Order ID</strong> is: <span class="fw-bold text-primary">#@Model</span></p>
+        <p class="text-muted">A confirmation email has been sent to your registered email address.</p>
+
+        <div class="confirmation-btns mt-4">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary me-2">
+                <i class="bi bi-house-door-fill"></i> Home
+            </a>
+            <a asp-controller="Service" asp-action="Index" class="btn btn-primary">
+                <i class="bi bi-search"></i> Browse More Services
+            </a>
         </div>
     </div>
 </div>

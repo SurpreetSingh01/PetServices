@@ -4,61 +4,97 @@
     ViewData["Title"] = "Order Details";
 }
 
+<style>
+    .order-card {
+        animation: fadeIn 0.8s ease-in-out;
+        border-radius: 20px;
+        background-color: #fff;
+        padding: 2rem;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .status-badge {
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>
+
 <div class="container mt-5">
-    <div class="text-center mb-4">
-        <h2>📦 Order #@Model.OrderId</h2>
-        <p class="text-muted">Placed on @Model.OrderDate.ToString("dd MMM yyyy")</p>
-    </div>
-
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <p><strong>User ID:</strong> @Model.UserId</p>
-            <p><strong>Payment Method:</strong> @Model.PaymentMethod</p>
+    <div class="order-card mx-auto">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-primary">📦 Order #@Model.OrderId</h2>
+            <p class="text-muted">Placed on @Model.OrderDate.ToString("dd MMM yyyy")</p>
         </div>
-        <div class="col-md-6 text-md-end">
-            <p>
-                <strong>Status:</strong>
-                <span class="badge @(Model.PaymentStatus == "Paid" ? "bg-success" : "bg-warning text-dark")">
-                    @Model.PaymentStatus
-                </span>
-            </p>
-        </div>
-    </div>
 
-    <h4>🧾 Ordered Services</h4>
-    <div class="table-responsive">
-        <table class="table table-bordered align-middle">
-            <thead class="table-light">
-                <tr class="text-center">
-                    <th>Service</th>
-                    <th>Unit Price</th>
-                    <th>Quantity</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.OrderItems)
-                {
-                    <tr class="text-center">
-                        <td>@item.Service?.ServiceName</td>
-                        <td>@item.UnitPrice.ToString("C")</td>
-                        <td>@item.Quantity</td>
-                        <td>@(item.UnitPrice * item.Quantity).ToString("C")</td>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p><strong>👤 User ID:</strong> @Model.UserId</p>
+                <p><strong>💳 Payment Method:</strong> @Model.PaymentMethod</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p>
+                    <strong>📌 Status:</strong>
+                    <span class="badge status-badge bg-@(
+                        Model.PaymentStatus == "Completed" ? "success" :
+                        Model.PaymentStatus == "Cancelled" ? "danger" :
+                        Model.PaymentStatus == "Paid" ? "primary" : "warning text-dark")">
+                        @Model.PaymentStatus
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <h4 class="mb-3">🧾 Ordered Services</h4>
+        <div class="table-responsive">
+            <table class="table table-hover text-center align-middle">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Service</th>
+                        <th>Unit Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
                     </tr>
-                }
-            </tbody>
-            <tfoot>
-                <tr class="table-light text-end">
-                    <td colspan="3"><strong>Grand Total:</strong></td>
-                    <td class="text-center"><strong>@Model.TotalAmount.ToString("C")</strong></td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.OrderItems)
+                    {
+                        <tr>
+                            <td>@item.Service?.ServiceName</td>
+                            <td>@item.UnitPrice.ToString("C")</td>
+                            <td>@item.Quantity</td>
+                            <td>@(item.UnitPrice * item.Quantity).ToString("C")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="table-light fw-bold">
+                        <td colspan="3" class="text-end">Grand Total:</td>
+                        <td>@Model.TotalAmount.ToString("C")</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
 
-    <div class="text-center mt-4">
-        <a asp-controller="Order" asp-action="Index" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left-circle"></i> Back to All Orders
-        </a>
+        <div class="text-center mt-4">
+            <a asp-controller="Order" asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left-circle"></i> Back to All Orders
+            </a>
+        </div>
     </div>
 </div>

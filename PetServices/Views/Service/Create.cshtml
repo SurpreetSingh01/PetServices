@@ -1,47 +1,62 @@
 ﻿@model PetServices.Models.Service
 
 @{
-    ViewData["Title"] = "Create Service";
+    ViewData["Title"] = "Create New Service";
 }
 
-<h1>Create Service</h1>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Create New Service</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
 
-<form asp-action="Create" method="post">
-    @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label asp-for="ServiceName" class="form-label fw-bold"></label>
+                            <input asp-for="ServiceName" class="form-control" placeholder="Enter service name" />
+                            <span asp-validation-for="ServiceName" class="text-danger"></span>
+                        </div>
 
-    <div class="form-group">
-        <label asp-for="ServiceName"></label>
-        <input asp-for="ServiceName" class="form-control" />
-        <span asp-validation-for="ServiceName" class="text-danger"></span>
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-bold"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Enter description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Price" class="form-label fw-bold"></label>
+                            <input asp-for="Price" class="form-control" placeholder="e.g. 29.99" />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="DurationInMinutes" class="form-label fw-bold"></label>
+                            <input asp-for="DurationInMinutes" class="form-control" placeholder="e.g. 60" />
+                            <span asp-validation-for="DurationInMinutes" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ImageUrl" class="form-label fw-bold">Image URL</label>
+                            <input asp-for="ImageUrl" type="text" class="form-control" placeholder="Enter image URL" />
+                            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="bi bi-save"></i> Create
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label asp-for="Description"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Price"></label>
-        <input asp-for="Price" class="form-control" />
-        <span asp-validation-for="Price" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="DurationInMinutes"></label>
-        <input asp-for="DurationInMinutes" class="form-control" />
-        <span asp-validation-for="DurationInMinutes" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="ImageUrl"></label>
-        <input asp-for="ImageUrl" type="text" class="form-control" />
-        <span asp-validation-for="ImageUrl" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Create</button>
-</form>
+</div>
 
 @section Scripts {
-    @Html.RenderPartialAsync("_ValidationScriptsPartial")
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }

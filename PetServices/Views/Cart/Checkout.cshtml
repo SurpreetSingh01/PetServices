@@ -6,46 +6,49 @@
 }
 
 <div class="container mt-5">
-    <h2 class="text-center mb-4">🧾 Checkout</h2>
+    <div class="text-center mb-4">
+        <h2 class="display-5 fw-bold text-primary">🧾 Secure Checkout</h2>
+        <p class="text-muted">Review your order and select a payment method</p>
+    </div>
 
-    <div class="card p-4 shadow-sm">
+    <div class="card p-5 shadow-lg border-0 rounded">
         <form asp-action="Checkout" method="post" id="checkoutForm">
             @Html.AntiForgeryToken()
 
-            <div class="mb-3">
-                <label for="paymentMethod" class="form-label">Select Payment Method:</label>
-                <select id="paymentMethod" name="paymentMethod" class="form-select" required>
+            <div class="mb-4">
+                <label for="paymentMethod" class="form-label fw-semibold">Select Payment Method:</label>
+                <select id="paymentMethod" name="paymentMethod" class="form-select form-select-lg" required>
                     <option value="COD">Cash on Delivery</option>
                     <option value="Stripe">Credit/Debit Card (Stripe)</option>
                 </select>
             </div>
 
-            <div id="creditCardNotice" class="alert alert-warning d-none">
-                You’ll be redirected to Stripe’s secure checkout page.
+            <div id="creditCardNotice" class="alert alert-info d-none">
+                💳 You’ll be redirected to Stripe’s secure checkout page.
             </div>
 
-            <div class="mt-4">
-                <h5 class="fw-bold">Order Summary</h5>
-                <ul class="list-group mb-3">
+            <div class="mt-5">
+                <h4 class="fw-bold text-secondary">🧾 Order Summary</h4>
+                <ul class="list-group list-group-flush mb-4">
                     @foreach (var item in Model)
                     {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <li class="list-group-item d-flex justify-content-between align-items-start bg-light rounded mb-2 shadow-sm">
                             <div>
                                 <strong>@item.Service.ServiceName</strong><br />
-                                <small>@item.Quantity × @(@item.Service.Price.ToString("C"))</small>
+                                <small class="text-muted">@item.Quantity × @(@item.Service.Price.ToString("C"))</small>
                             </div>
-                            <span>@((item.Quantity * item.Service.Price).ToString("C"))</span>
+                            <span class="fw-bold">@((item.Quantity * item.Service.Price).ToString("C"))</span>
                         </li>
                     }
-                    <li class="list-group-item d-flex justify-content-between">
-                        <strong>Total:</strong>
-                        <strong>@(grandTotal.ToString("C"))</strong>
+                    <li class="list-group-item d-flex justify-content-between bg-primary text-white fw-bold rounded shadow-sm">
+                        <span>Total:</span>
+                        <span>@(grandTotal.ToString("C"))</span>
                     </li>
                 </ul>
             </div>
 
             <div class="text-center">
-                <button type="submit" class="btn btn-success btn-lg">Place Order</button>
+                <button type="submit" class="btn btn-success btn-lg px-5 py-2 shadow">Place Order</button>
             </div>
         </form>
     </div>

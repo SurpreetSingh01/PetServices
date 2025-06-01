@@ -63,11 +63,26 @@ namespace PetServices.Controllers
             return View(service);
         }
 
+        // GET: Service/Delete/5 (Show confirmation page)
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
+        {
+            var service = await _serviceRepo.GetByIdAsync(id);
+            if (service == null)
+                return NotFound();
+
+            return View(service); // Renders confirmation view
+        }
+
+        // POST: Service/Delete/5 (Actually delete after confirmation)
+        [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _serviceRepo.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
+
     }
 }

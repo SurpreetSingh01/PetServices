@@ -4,132 +4,156 @@
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="container mt-4">
-    <h2 class="text-center mb-4">📊 Admin Dashboard</h2>
+<style>
+    .dashboard-summary .card {
+        border-radius: 15px;
+        transition: transform 0.2s ease-in-out;
+    }
+
+        .dashboard-summary .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+    .table thead {
+        background: linear-gradient(90deg, #007bff, #6610f2);
+        color: white;
+    }
+
+    .status-badge {
+        padding: 0.5em 1em;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+
+    .filter-select {
+        border-radius: 20px;
+    }
+
+    .dashboard-header {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #343a40;
+        text-shadow: 1px 1px 2px #ddd;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="text-center mb-4">
+        <h2 class="dashboard-header">📊 Admin Dashboard</h2>
+    </div>
 
     <!-- Summary Cards -->
-    <div class="row text-center mb-4">
-        <div class="col-md-3">
-            <div class="card shadow-sm">
+    <div class="row text-center mb-5 dashboard-summary">
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-left-primary">
                 <div class="card-body">
-                    <h6>Total Orders</h6>
-                    <h4>@Model.TotalOrders</h4>
+                    <h6 class="text-muted">Total Orders</h6>
+                    <h3 class="fw-bold text-primary">@Model.TotalOrders</h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm">
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-left-success">
                 <div class="card-body">
-                    <h6>Total Sales</h6>
-                    <h4>@Model.TotalSales.ToString("C")</h4>
+                    <h6 class="text-muted">Total Sales</h6>
+                    <h3 class="fw-bold text-success">@Model.TotalSales.ToString("C")</h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm">
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-left-info">
                 <div class="card-body">
-                    <h6>Total Users</h6>
-                    <h4>@Model.TotalUsers</h4>
+                    <h6 class="text-muted">Total Users</h6>
+                    <h3 class="fw-bold text-info">@Model.TotalUsers</h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm">
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-left-dark">
                 <div class="card-body">
-                    <h6>Completed Orders</h6>
-                    <h4>@(Model.OrdersByStatus.ContainsKey("Completed") ? Model.OrdersByStatus["Completed"] : 0)</h4>
+                    <h6 class="text-muted">Completed Orders</h6>
+                    <h3 class="fw-bold text-dark">@(Model.OrdersByStatus.ContainsKey("Completed") ? Model.OrdersByStatus["Completed"] : 0)</h3>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Filters -->
-    <form method="get" class="row g-3 mb-3">
+    <form method="get" class="row g-3 mb-4">
         <div class="col-md-4">
-            <select name="statusFilter" class="form-select" onchange="this.form.submit()">
-                <option value="">All Statuses</option>
+            <select name="statusFilter" class="form-select filter-select" onchange="this.form.submit()">
+                <option value="">🔎 All Statuses</option>
                 @foreach (var status in new[] { "Pending", "Paid", "Completed", "Cancelled" })
                 {
-                    <option value="@status" selected="@(Context.Request.Query["statusFilter"] == status)">@status</option>
+                    <option value="@status" selected="@(Context.Request.Query["statusFilter"] == status)">
+                        @status
+                    </option>
                 }
             </select>
         </div>
         <div class="col-md-4">
-            <select name="sortOrder" class="form-select" onchange="this.form.submit()">
-                <option value="">Sort by Date (Asc)</option>
-                <option value="date_desc" selected="@(Context.Request.Query["sortOrder"] == "date_desc")">Date Desc</option>
-                <option value="amount_asc" selected="@(Context.Request.Query["sortOrder"] == "amount_asc")">Amount Asc</option>
-                <option value="amount_desc" selected="@(Context.Request.Query["sortOrder"] == "amount_desc")">Amount Desc</option>
+            <select name="sortOrder" class="form-select filter-select" onchange="this.form.submit()">
+                <option value="">⬆️ Date Ascending</option>
+                <option value="date_desc" selected="@(Context.Request.Query["sortOrder"] == "date_desc")">⬇️ Date Desc</option>
+                <option value="amount_asc" selected="@(Context.Request.Query["sortOrder"] == "amount_asc")">💲 Amount Asc</option>
+                <option value="amount_desc" selected="@(Context.Request.Query["sortOrder"] == "amount_desc")">💰 Amount Desc</option>
             </select>
         </div>
     </form>
 
     <!-- Orders Table -->
-    <table class="table table-bordered table-hover">
-        <thead class="table-dark text-center">
-            <tr>
-                <th>Order ID</th>
-                <th>User</th>
-                <th>Date</th>
-                <th>Total</th>
-                <th>Payment</th>
-                <th>Status</th>
-                <th>Update</th>
-                <th>Invoice</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var order in Model.Orders)
-            {
-                <tr class="text-center">
-                    <td>@order.OrderId</td>
-                    <td>@order.UserId</td>
-                    <td>@order.OrderDate.ToShortDateString()</td>
-                    <td>@order.TotalAmount.ToString("C")</td>
-                    <td>@order.PaymentMethod</td>
-                    <td>
-                        <span class="badge bg-@(
-                            order.PaymentStatus == "Completed" ? "success" :
-                            order.PaymentStatus == "Cancelled" ? "danger" :
-                            order.PaymentStatus == "Paid" ? "primary" : "warning text-dark")">
-                            @order.PaymentStatus
-                        </span>
-                    </td>
-                    <td>
-                        <form asp-action="UpdateStatus" method="post" class="d-flex justify-content-center align-items-center">
-                            <input type="hidden" name="orderId" value="@order.OrderId" />
-                            <select name="newStatus" class="form-select form-select-sm me-2">
-                                @foreach (var status in new[] { "Pending", "Paid", "Completed", "Cancelled" })
-                                {
-                                    <option value="@status" selected="@(status == order.PaymentStatus)">@status</option>
-                                }
-                            </select>
-                            <button type="submit" class="btn btn-sm btn-success">✔</button>
-                        </form>
-                    </td>
-                    <td>
-                        <a asp-action="DownloadInvoice" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-file-earmark-pdf"></i>
-                        </a>
-                    </td>
+    <div class="table-responsive shadow-sm">
+        <table class="table table-hover align-middle text-center">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Update</th>
+                    <th>Invoice</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-
-    <!-- Orders by Status Summary -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <h5>📑 Orders by Status</h5>
-            <ul class="list-group list-group-horizontal">
-                @foreach (var status in Model.OrdersByStatus)
+            </thead>
+            <tbody>
+                @foreach (var order in Model.Orders)
                 {
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <strong>@status.Key</strong>
-                        <span class="badge bg-secondary rounded-pill">@status.Value</span>
-                    </li>
+                    <tr>
+                        <td>@order.OrderId</td>
+                        <td>@order.UserId</td>
+                        <td>@order.OrderDate.ToString("dd MMM yyyy")</td>
+                        <td>@order.TotalAmount.ToString("C")</td>
+                        <td>@order.PaymentMethod</td>
+                        <td>
+                            <span class="badge status-badge bg-@(
+                                order.PaymentStatus == "Completed" ? "success" :
+                                order.PaymentStatus == "Cancelled" ? "danger" :
+                                order.PaymentStatus == "Paid" ? "primary" : "warning text-dark")">
+                                @order.PaymentStatus
+                            </span>
+                        </td>
+                        <td>
+                            <form asp-action="UpdateStatus" method="post" class="d-flex justify-content-center align-items-center">
+                                <input type="hidden" name="orderId" value="@order.OrderId" />
+                                <select name="newStatus" class="form-select form-select-sm me-2">
+                                    @foreach (var status in new[] { "Pending", "Paid", "Completed", "Cancelled" })
+                                    {
+                                        <option value="@status" selected="@(status == order.PaymentStatus)">@status</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-success">✔</button>
+                            </form>
+                        </td>
+                        <td>
+                            <a asp-action="DownloadInvoice" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-danger" title="Download Invoice">
+                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                            </a>
+                        </td>
+                    </tr>
                 }
-            </ul>
-        </div>
+            </tbody>
+        </table>
     </div>
 </div>

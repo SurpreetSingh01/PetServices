@@ -1,42 +1,65 @@
 ﻿@model PetServices.Models.Service
 
-<h1>Edit Service</h1>
+@{
+    ViewData["Title"] = "Edit Service";
+}
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="Id" />
+<div class="container mt-5">
+    <h2 class="text-center text-primary mb-4">✏️ Edit Service</h2>
 
-    <div class="form-group">
-        <label asp-for="ServiceName"></label>
-        <input asp-for="ServiceName" class="form-control" />
-        <span asp-validation-for="ServiceName" class="text-danger"></span>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow p-4">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="mb-3">
+                        <label asp-for="ServiceName" class="form-label fw-bold">Service Name</label>
+                        <input asp-for="ServiceName" class="form-control" placeholder="Enter service name" />
+                        <span asp-validation-for="ServiceName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label fw-bold">Description</label>
+                        <textarea asp-for="Description" rows="3" class="form-control" placeholder="Describe the service..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label asp-for="Price" class="form-label fw-bold">Price ($)</label>
+                            <input asp-for="Price" class="form-control" placeholder="e.g. 25.00" />
+                            <span asp-validation-for="Price" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DurationInMinutes" class="form-label fw-bold">Duration (minutes)</label>
+                            <input asp-for="DurationInMinutes" class="form-control" placeholder="e.g. 45" />
+                            <span asp-validation-for="DurationInMinutes" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ImageUrl" class="form-label fw-bold">Image URL</label>
+                        <input asp-for="ImageUrl" class="form-control" placeholder="https://..." />
+                        <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <div class="mb-3 text-center">
+                            <label class="form-label">Current Image:</label><br />
+                            <img src="@Model.ImageUrl" alt="Service Image" class="img-thumbnail" style="max-height: 200px;" />
+                        </div>
+                    }
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning fw-bold">✅ Update Service</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label asp-for="Description"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Price"></label>
-        <input asp-for="Price" class="form-control" />
-        <span asp-validation-for="Price" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="DurationInMinutes"></label>
-        <input asp-for="DurationInMinutes" class="form-control" />
-        <span asp-validation-for="DurationInMinutes" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="ImageUrl"></label>
-        <input asp-for="ImageUrl" class="form-control" />
-        <span asp-validation-for="ImageUrl" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-warning">Update</button>
-</form>
+</div>
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")

@@ -7,7 +7,7 @@
 <div class="container mt-4">
     <h2 class="text-center mb-4">📊 Admin Dashboard</h2>
 
-    <!-- Top Summary Cards -->
+    <!-- Summary Cards -->
     <div class="row text-center mb-4">
         <div class="col-md-3">
             <div class="card shadow-sm">
@@ -37,7 +37,7 @@
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h5>Completed Orders</h5>
-                    <h3>@Model.OrdersByStatus.ContainsKey("Completed") ? @Model.OrdersByStatus["Completed"] : 0</h3>
+                    <h3>@(Model.OrdersByStatus.ContainsKey("Completed") ? Model.OrdersByStatus["Completed"] : 0)</h3>
                 </div>
             </div>
         </div>
@@ -118,20 +118,3 @@
             }
         </tbody>
     </table>
-
-    <!-- Orders by Status Breakdown -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <h5>📑 Orders by Status</h5>
-            <ul class="list-group list-group-horizontal">
-                @foreach (var status in Model.OrdersByStatus)
-                {
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <strong>@status.Key</strong>
-                        <span class="badge bg-secondary rounded-pill">@status.Value</span>
-                    </li>
-                }
-            </ul>
-        </div>
-    </div>
-</div>

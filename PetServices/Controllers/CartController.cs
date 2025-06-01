@@ -7,6 +7,7 @@ using PetServices.Services;
 using Stripe.Checkout;
 using Stripe;
 using Microsoft.AspNetCore.Identity;
+using System.Text;
 
 namespace PetServices.Controllers
 {
@@ -81,6 +82,25 @@ namespace PetServices.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateCart(List<CartItem> cartItems)
+        {
+            var userId = User.Identity.Name;
+
+            foreach (var item in cartItems)
+            {
+                var cartItem = await _context.CartItems.FindAsync(item.Id);
+                if (cartItem != null && cartItem.UserId == userId)
+                {
+                    cartItem.Quantity = item.Quantity;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
         public async Task<IActionResult> Checkout()
         {
             var userId = User.Identity.Name;
@@ -105,7 +125,6 @@ namespace PetServices.Controllers
             if (!cartItems.Any())
                 return RedirectToAction(nameof(Index));
 
-            // Get full user object to access email
             var user = await _userManager.FindByNameAsync(userId);
             var userEmail = user?.Email ?? userId;
 
@@ -170,7 +189,120 @@ namespace PetServices.Controllers
                 return new StatusCodeResult(303);
             }
 
-            await _emailService.SendEmailAsync(userEmail, "Order Confirmation - PetServices", "Thank you for your order!");
+            var sb = new StringBuilder();
+            sb.Append(@$"
+<html>
+<head>
+    <style>
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f2f2f2;
+            color: #333;
+            padding: 20px;
+        }}
+        .container {{
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 650px;
+            margin: auto;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }}
+        h2 {{
+            color: #0d6efd;
+            margin-bottom: 10px;
+        }}
+        .summary {{
+            margin-top: 20px;
+            font-size: 14px;
+        }}
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }}
+        th {{
+            background-color: #0d6efd;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }}
+        td {{
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            vertical-align: middle;
+        }}
+        .service-img {{
+            border-radius: 6px;
+            width: 60px;
+            height: auto;
+            margin-right: 8px;
+            vertical-align: middle;
+        }}
+        .total {{
+            text-align: right;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 10px;
+            color: #28a745;
+        }}
+        .footer {{
+            margin-top: 30px;
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+        }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <h2>🐾 PetServices - Order Confirmation</h2>
+        <p>Hi {userEmail},</p>
+        <p>Thank you for your order <strong>#{order.OrderId}</strong> placed on <strong>{order.OrderDate:dd MMM yyyy}</strong>.</p>
+
+        <h4 style='margin-top: 30px;'>🧾 Ordered Services:</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>");
+
+            foreach (var item in order.OrderItems)
+            {
+                sb.Append(@$"
+                <tr>
+                    <td> {item.Service?.ServiceName}</td>
+                    <td>{item.Quantity}</td>
+                    <td>{item.UnitPrice:C}</td>
+                    <td>{(item.Quantity * item.UnitPrice):C}</td>
+                </tr>");
+            }
+
+            sb.Append(@$"
+            </tbody>
+        </table>
+
+        <p class='total'>Total: {order.TotalAmount:C}</p>
+
+        <div class='summary'>
+            <p>We’ll keep you updated with further details. You can also manage your orders anytime from your account dashboard.</p>
+        </div>
+
+        <div class='footer'>
+            © 2025 PetServices • <a href='mailto:support@petservices.com'>support@petservices.com</a>
+        </div>
+    </div>
+</body>
+</html>");
+
+
+
+            await _emailService.SendEmailAsync(userEmail, "Order Confirmation - PetServices", sb.ToString());
 
             _context.CartItems.RemoveRange(cartItems);
             await _context.SaveChangesAsync();

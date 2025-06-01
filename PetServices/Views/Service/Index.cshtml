@@ -8,54 +8,119 @@
     var isAdmin = User.IsInRole("Admin");
 }
 
-<h1 class="text-center mb-4">Our Pet Services</h1>
+<style>
+    body {
+        background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+        font-family: 'Segoe UI', sans-serif;
+    }
 
-@if (SignInManager.IsSignedIn(User) && isAdmin)
-{
-    <div class="text-end mb-3">
-        <a href="@Url.Action("Create", "Service")" class="btn btn-success">Create New Service</a>
-    </div>
-}
+    h1 {
+        color: #333;
+        font-weight: bold;
+        margin-top: 30px;
+        text-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+    }
 
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    @foreach (var service in Model)
+    .card {
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .card-text {
+        color: #555;
+    }
+
+    .card-footer {
+        border-top: none;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+    .btn-warning {
+        background-color: #ffc107;
+        border: none;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+    }
+
+    .btn-sm {
+        padding: 5px 12px;
+        border-radius: 20px;
+    }
+</style>
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">🐾 Our Pet Services</h1>
+
+    @if (SignInManager.IsSignedIn(User) && isAdmin)
     {
-        <div class="col">
-            <div class="card h-100 shadow-sm">
-                @if (!string.IsNullOrEmpty(service.ImageUrl))
-                {
-                    <img src="@service.ImageUrl" class="card-img-top" alt="@service.ServiceName"
-                         style="width: 100%; height: 200px; object-fit: cover; border-bottom: 1px solid #ddd;" />
-                }
-                else
-                {
-                    <img src="https://via.placeholder.com/300x200?text=No+Image" class="card-img-top"
-                         alt="No Image" style="width: 100%; height: 200px; object-fit: cover;" />
-                }
-
-                <div class="card-body">
-                    <h5 class="card-title">@service.ServiceName</h5>
-                    <p class="card-text">@service.Description</p>
-                    <p class="card-text"><strong>Price:</strong> $@service.Price</p>
-                    <p class="card-text"><strong>Duration:</strong> @service.DurationInMinutes mins</p>
-                </div>
-                <div class="card-footer bg-white">
-                    @if (SignInManager.IsSignedIn(User) && isAdmin)
-                    {
-                        <a href="@Url.Action("Edit", "Service", new { id = service.Id })" class="btn btn-warning btn-sm me-1">Edit</a>
-                        <a href="@Url.Action("Delete", "Service", new { id = service.Id })" class="btn btn-danger btn-sm me-1">Delete</a>
-                       // <a href="@Url.Action("Details", "Service", new { id = service.Id })" class="btn btn-info btn-sm">Details</a>
-                    }
-                    else if (SignInManager.IsSignedIn(User))
-                    {
-                        <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline">
-                            <input type="hidden" name="serviceId" value="@service.Id" />
-                            <input type="hidden" name="quantity" value="1" />
-                            <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
-                        </form>
-                    }
-                </div>
-            </div>
+        <div class="text-end mb-3">
+            <a href="@Url.Action("Create", "Service")" class="btn btn-success">➕ Create New Service</a>
         </div>
     }
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var service in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    @if (!string.IsNullOrEmpty(service.ImageUrl))
+                    {
+                        <img src="@service.ImageUrl" class="card-img-top" alt="@service.ServiceName"
+                             style="width: 100%; height: 200px; object-fit: cover; border-top-left-radius: 15px; border-top-right-radius: 15px;" />
+                    }
+                    else
+                    {
+                        <img src="https://via.placeholder.com/300x200?text=No+Image" class="card-img-top"
+                             alt="No Image" style="width: 100%; height: 200px; object-fit: cover;" />
+                    }
+
+                    <div class="card-body text-center">
+                        <h5 class="card-title">@service.ServiceName</h5>
+                        <p class="card-text">@service.Description</p>
+                        <p class="card-text"><strong>Price:</strong> $@service.Price</p>
+                        <p class="card-text"><strong>Duration:</strong> @service.DurationInMinutes mins</p>
+                    </div>
+                    <div class="card-footer bg-white">
+                        @if (SignInManager.IsSignedIn(User) && isAdmin)
+                        {
+                            <a href="@Url.Action("Edit", "Service", new { id = service.Id })" class="btn btn-warning btn-sm me-1">Edit</a>
+                            <a href="@Url.Action("Delete", "Service", new { id = service.Id })" class="btn btn-danger btn-sm me-1">Delete</a>
+                        }
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline">
+                                <input type="hidden" name="serviceId" value="@service.Id" />
+                                <input type="hidden" name="quantity" value="1" />
+                                <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
+                            </form>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 </div>
