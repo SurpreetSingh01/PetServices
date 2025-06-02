@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PetServices.Data;
 using PetServices.Services;
 using Stripe;
-using Rotativa.AspNetCore;
+//using Rotativa.AspNetCore;
 using PetServices.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,7 +54,7 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 // ✅ Rotativa setup for PDF generation
-RotativaConfiguration.Setup(app.Environment.WebRootPath, "Rotativa");
+//RotativaConfiguration.Setup(app.Environment.WebRootPath, "Rotativa");
 
 // ✅ Run seeders: Admin + Services
 using (var scope = app.Services.CreateScope())
